@@ -4,7 +4,7 @@
 *.dll
 *.so
 *.dylib
-sensu-opcua-checks
+cmd/sensu-opcua-metrics/sensu-opcua-metrics
 
 # Test binary, build with `go test -c`
 *.test

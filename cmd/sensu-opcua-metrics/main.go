@@ -144,9 +144,12 @@ func createMetrics(resp *ua.ReadResponse) error {
 		if result.Status != ua.StatusOK {
 			return fmt.Errorf("Result Status not OK: %v", result.Status)
 		}
-		tags = fmt.Sprintf("ns=%v", nodes[i].NodeID.Namespace())
+		tags = fmt.Sprintf(`ns="%v"`, nodes[i].NodeID.Namespace())
 		for _, t := range plugin.Tags {
-			tags += fmt.Sprintf(" ,%s", strings.TrimSpace(t))
+			segments := strings.SplitN(t, `=`, 2)
+			if len(segments) == 2 {
+				tags += fmt.Sprintf(` , %s="%s"`, strings.TrimSpace(segments[0]), strings.TrimSpace(segments[1]))
+			}
 		}
 		/* Auto detection of metric point timestamp precision using a heuristic with a 250-ish year cutoff */
 		timestamp := result.SourceTimestamp.UnixNano()
