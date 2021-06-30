@@ -106,7 +106,10 @@ metadata:
   name: sensu-opcua-metrics
   namespace: default
 spec:
-  command: sensu-opcua-metrics --endpoint "opc.tpc://server.example.com:4840" --nodes "ns=1;s=NODE_NAME1, ns=1;s=NODE_NAME2"
+  command: >- 
+    sensu-opcua-metrics 
+    --endpoint "opc.tpc://server.example.com:4840" 
+    --nodes "ns=1;s=NODE_NAME1, ns=1;s=NODE_NAME2"
   output_metric_format: prometheus_text
   output_metric_handlers:
   - metric-storage
