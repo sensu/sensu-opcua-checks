@@ -35,7 +35,7 @@ var (
 		PluginConfig: sensu.PluginConfig{
 			Name:     "sensu-opcua-metrics",
 			Short:    "Sensu metrics for OPC-UA nodes",
-			Keyspace: "sensu.io/plugins/opcua-metrics/config",
+			Keyspace: "sensu.io/plugins/opcua/config",
 		},
 	}
 	nodes = []*ua.ReadValueID{}
