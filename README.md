@@ -2,39 +2,15 @@
 ![Go Test](https://github.com/sensu/sensu-opcua-checks/workflows/Go%20Test/badge.svg)
 ![goreleaser](https://github.com/sensu/sensu-opcua-checks/workflows/goreleaser/badge.svg)
 
-# Check Plugin Template
-
-## Overview
-check-plugin-template is a template repository which wraps the [Sensu Plugin SDK][2].
-To use this project as a template, click the "Use this template" button from the main project page.
-Once the repository is created from this template, you can use the [Sensu Plugin Tool][9] to
-populate the templated fields with the proper values.
-
-## Functionality
-
-After successfully creating a project from this template, update the `Config` struct with any
-configuration options for the plugin, map those values as plugin options in the variable `options`,
-and customize the `checkArgs` and `executeCheck` functions in [main.go][7].
-
-When writing or updating a plugin's README from this template, review the Sensu Community
-[plugin README style guide][3] for content suggestions and guidance. Remove everything
-prior to `# Sensu OPC-UA Checks` from the generated README file, and add additional context about the
-plugin per the style guide.
-
-## Releases with Github Actions
-
-To release a version of your project, simply tag the target sha with a semver release without a `v`
-prefix (ex. `1.0.0`). This will trigger the [GitHub action][5] workflow to [build and release][4]
-the plugin with goreleaser. Register the asset with [Bonsai][8] to share it with the community!
-
-***
 
 # Sensu OPC-UA Checks
 
 ## Table of Contents
 - [Overview](#overview)
-- [Files](#files)
 - [Usage examples](#usage-examples)
+  - [Help output](#help-output)
+  - [Environment variables](#environment-variables)
+  - [Annotations](#annotations)
 - [Configuration](#configuration)
   - [Asset registration](#asset-registration)
   - [Check definition](#check-definition)
@@ -44,11 +20,65 @@ the plugin with goreleaser. Register the asset with [Bonsai][8] to share it with
 
 ## Overview
 
-The Sensu OPC-UA Checks is a [Sensu Check][6] that ...
-
-## Files
+The Sensu OPC-UA Checks are  [Sensu Checks][6] that query Node values obtained from OPC-UA endpoints.
+Note: These Sensu checks are built using the [native Golang OPC-UA implementation][11] 
 
 ## Usage examples
+
+### sensu-upcua-metrics
+Help:
+
+```
+Sensu metrics for OPC-UA nodes
+
+Usage:
+  sensu-opcua-metrics [flags]
+  sensu-opcua-metrics [command]
+
+Available Commands:
+  help        Help about any command
+  version     Print the version number of this plugin
+
+Flags:
+  -e, --endpoint string         OP-CUA endpoint (default "opc.tcp://localhost:4840")
+  -n, --nodes strings           Comma separated list of OP-CUA nodes to read (ex "ns=1;s=NODE_NAME1, ns=1;s=NODE_NAME2")
+  -t, --tags strings            Comma separated list of additional metrics tags to add (ex: "first=value, second=value")
+      --metrics-format string   Metrics Format (currently only prometheus supported) (default "prometheus")
+      --dry-run                 Dry-run, do not communicate with endpoint, implies verbose
+  -v, --verbose                 Enable verbose logging
+  -h, --help                    help for sensu-opcua-metrics
+```
+
+### Environment variables
+
+|Argument               |Environment Variable            |
+|-----------------------|--------------------------------|
+|--endpoint             |OPCUA_ENDPOINT                  |
+|--nodes                |OPCUA_NODES                     |
+|--tags                 |OPCUA_TAGS                      |
+|--metrics-format       |OPCUA_METRICS_FORMAT            |
+
+### Annotations
+
+All arguments for these checks are tunable on a per entity or check basis based
+on annotations. The annotations keyspace for this collection of checks is
+`sensu.io/plugins/opcua/config`.
+
+**NOTE**: Due to [check token substituion][10], supplying a template value such
+as for `description-template` as a check annotation requires that you place the
+desired template as a [golang string literal][11] (enlcosed in backticks)
+within another template definition.  This does not apply to entity annotations.
+
+#### Examples
+
+To customize the opcua endpoint for a given entity, you could use the following
+sensu-agent configuration snippet:
+
+```yml
+# /etc/sensu/agent.yml example
+annotations:
+  sensu.io/plugins/opcua/config/endpoint: 'opc.tpc://server.example.com:4840'
+```
 
 ## Configuration
 
@@ -66,19 +96,25 @@ If you're using an earlier version of sensuctl, you can find the asset on the [B
 
 ### Check definition
 
+#### sensu-upcua-metrics
+
 ```yml
 ---
 type: CheckConfig
 api_version: core/v2
 metadata:
-  name: sensu-opcua-checks
+  name: sensu-opcua-metrics
   namespace: default
 spec:
-  command: sensu-opcua-checks --example example_arg
+  command: sensu-opcua-metrics --endpoint "opc.tpc://server.example.com:4840" --nodes "ns=1;s=NODE_NAME1, ns=1;s=NODE_NAME2"
+  output_metric_format: prometheus_text
+  output_metric_handlers:
+  - metric-storage
   subscriptions:
-  - system
+  - opcua
   runtime_assets:
   - sensu/sensu-opcua-checks
+
 ```
 
 ## Installation from source
@@ -109,3 +145,4 @@ For more information about contributing to this plugin, see [Contributing][1].
 [8]: https://bonsai.sensu.io/
 [9]: https://github.com/sensu-community/sensu-plugin-tool
 [10]: https://docs.sensu.io/sensu-go/latest/reference/assets/
+[11]: https://github.com/gopcua/opcua
