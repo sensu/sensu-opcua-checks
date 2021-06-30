@@ -178,12 +178,11 @@ func createMetrics(resp *ua.ReadResponse) error {
 }
 
 func readNodes() (*ua.ReadResponse, error) {
-	var nodeID string
+	nodeID := ""
 	if plugin.Verbose {
 		log.Println("Reading Nodes:")
 	}
 	for _, n := range plugin.Nodes {
-		nodeID = ""
 		if len(plugin.Namespace) > 0 {
 			nodeID = fmt.Sprintf("ns=%s;s=%s", plugin.Namespace, strings.TrimSpace(n))
 		} else {
@@ -194,7 +193,7 @@ func readNodes() (*ua.ReadResponse, error) {
 		}
 		id, err := ua.ParseNodeID(nodeID)
 		if err != nil {
-			log.Println(`Error: "%s" has invalid node id: %v`, nodeID, err)
+			log.Printf(`Error: "%s" has invalid node id: %v\n`, nodeID, err)
 			return nil, err
 		}
 		nodes = append(nodes, &ua.ReadValueID{NodeID: id})
@@ -202,7 +201,7 @@ func readNodes() (*ua.ReadResponse, error) {
 	ctx := context.Background()
 	c := opcua.NewClient(plugin.Endpoint, opcua.SecurityMode(ua.MessageSecurityModeNone))
 	if err := c.Connect(ctx); err != nil {
-		log.Println("Error: UA connection: %s", err)
+		log.Printf("Error: UA connection: %s\n", err)
 		return nil, err
 	}
 	defer c.Close()
@@ -215,7 +214,7 @@ func readNodes() (*ua.ReadResponse, error) {
 
 	resp, err := c.Read(req)
 	if err != nil {
-		log.Println("Error: UA Read Request failed: %s", err)
+		log.Printf("Error: UA Read Request failed: %s", err)
 		return nil, err
 	}
 	return resp, err
